@@ -1,8 +1,17 @@
-<h2>Login</h2>
+<form class="login" id="loginForm">
+  <div class="field">
+    <input id="loginEmail" type="text" placeholder="Email Address" required>
+  </div>
 
-<input id="username" placeholder="username">
-<input id="password" placeholder="password" type="password">
+  <div class="field">
+    <input id="loginPassword" type="password" placeholder="Password" required>
+  </div>
 
-<button onclick="login()">Login</button>
+  <div class="pass-link"><a href="#">Forgot password?</a></div>
 
-<script src="script.js"></script>
+  <div class="field btn">
+    <div class="btn-layer"></div>
+    <input type="submit" value="Login">
+  </div>
+
+  <div class="signup-link">Not a member? <a href="#">Signup now</a></div>

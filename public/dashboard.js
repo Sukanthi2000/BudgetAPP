@@ -173,6 +173,27 @@ console.log(err)
 })
 
 }
+//------------Download Function----------
+function downloadStatement() {
+    // 1️⃣ Get all transactions from table
+    const rows = document.querySelectorAll("#transactions tr");
+    let csvContent = "Date,Message,Type,Amount\n";
+
+    rows.forEach(row => {
+        const cols = row.querySelectorAll("td");
+        if(cols.length > 0){
+            const rowData = Array.from(cols).map(c => c.innerText).join(",");
+            csvContent += rowData + "\n";
+        }
+    });
+
+    // 2️⃣ Create a blob and download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "transactions.csv";
+    link.click();
+}
 
 
 // ---------- LOAD TRANSACTIONS ----------

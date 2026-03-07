@@ -128,7 +128,7 @@ message:message
 .then(res=>res.json())
 .then(data=>{
 
-alert(data.message)
+//alert(data.message)
 
 document.getElementById("amount").value=""
 document.getElementById("message").value=""

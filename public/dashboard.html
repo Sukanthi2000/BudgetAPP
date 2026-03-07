@@ -21,6 +21,17 @@ body{
     padding:30px;
     border-radius:12px;
     box-shadow:0 10px 25px rgba(0,0,0,0.2);
+    position:relative;
+}
+
+/* PRINT BUTTON TOP RIGHT */
+
+.print-btn{
+    position:absolute;
+    top:20px;
+    right:20px;
+    background:#6c757d;
+    color:white;
 }
 
 h2{
@@ -87,6 +98,20 @@ tr:nth-child(even){
     background:#f2f2f2;
 }
 
+/* HIDE BUTTONS WHEN PRINTING */
+
+@media print{
+
+button{
+display:none;
+}
+
+input{
+display:none;
+}
+
+}
+
 </style>
 
 </head>
@@ -94,6 +119,8 @@ tr:nth-child(even){
 <body>
 
 <div class="container">
+
+<button class="print-btn" onclick="printStatement()">Print</button>
 
 <h2>Budget Dashboard</h2>
 
@@ -139,4 +166,3 @@ Current Balance: ₹ <span id="balance">0</span>
 
 </body>
 </html>
-

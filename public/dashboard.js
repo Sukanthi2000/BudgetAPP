@@ -7,6 +7,15 @@ alert("Please login first")
 window.location = "index.html"
 }
 
+// ---------- BACK BUTTON / CACHE PROTECTION ----------
+window.history.pushState(null, null, window.location.href);
+window.onpopstate = function () {
+    if(!localStorage.getItem("userId")){
+        alert("Please login first");
+        window.location = "index.html";
+    }
+};
+
 
 // ---------- PAGE LOAD ----------
 
@@ -55,7 +64,7 @@ message:message
 
 .then(data=>{
 
-alert(data.message)
+//alert(data.message)
 
 clearInputs()
 
@@ -128,6 +137,7 @@ message:message
 .then(res=>res.json())
 .then(data=>{
 
+    
 //alert(data.message)
 
 document.getElementById("amount").value=""

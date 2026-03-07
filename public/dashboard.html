@@ -51,7 +51,15 @@ h2{
     cursor:pointer;
     font-weight:bold;
 }   
-
+.download{
+    background:#007bff;
+    color:white;
+    padding:10px 15px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
 .balance-box{
     text-align:center;
     font-size:22px;
@@ -152,7 +160,7 @@ Current Balance: ₹ <span id="balance">0</span>
 <button class="credit" onclick="addCredit()">Add Credit</button>
 <button class="debit" onclick="addDebit()">Add Debit</button>
 
-<button class="summary" onclick="getSummary()">View Summary</button>
+<button class="download" onclick="downloadStatement()">Download Statement</button>
 
 <h3>Total Spent: ₹ <span id="spent">0</span></h3>
 
@@ -179,5 +187,6 @@ Current Balance: ₹ <span id="balance">0</span>
 
 </body>
 </html>
+
 
 

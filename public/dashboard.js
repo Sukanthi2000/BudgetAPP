@@ -76,15 +76,35 @@ alert("Error adding credit")
 
 function addDebit(){
 
-const amount = document.getElementById("amount").value
+const amount = parseInt(document.getElementById("amount").value)
 const date = document.getElementById("date").value
 const message = document.getElementById("message").value
 
-if(amount === "" || date === ""){
+if(!amount || !date){
 alert("Enter amount and date")
 return
 }
 
+// First get current balance
+fetch("/summary/" + userId)
+
+.then(res => res.json())
+
+.then(data => {
+
+const credit = data.credit || 0
+const debit = data.debit || 0
+const balance = credit - debit
+
+// Check balance before debit
+if(amount > balance){
+
+alert("⚠ Minimum balance reached. Cannot debit more than available balance.")
+return
+
+}
+
+// If balance is sufficient, perform debit
 fetch("/transaction",{
 
 method:"POST",
@@ -97,7 +117,7 @@ body:JSON.stringify({
 
 userId:userId,
 type:"debit",
-amount:parseInt(amount),
+amount:amount,
 date:date,
 message:message
 
@@ -106,17 +126,20 @@ message:message
 })
 
 .then(res=>res.json())
-
 .then(data=>{
 
 alert(data.message)
 
-clearInputs()
+document.getElementById("amount").value=""
+document.getElementById("message").value=""
 
 loadTransactions()
 getSummary()
 
 })
+
+})
+
 
 .catch(err=>{
 console.log(err)

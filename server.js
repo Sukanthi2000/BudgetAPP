@@ -68,7 +68,7 @@ app.post("/login",(req,res)=>{
     (err,row)=>{
 
       if(!row){
-        return res.send({message:"Invalid login,Signup if a new user"});
+        return res.send({message:"Invalid login,Signup if new user"});
       }
 
       res.send({
@@ -93,7 +93,9 @@ app.post("/transaction",(req,res)=>{
     [userId,type,amount,date,message],
     function(err){
 
-      if(err) return res.send(err);
+      if(err){
+        return res.send(err);
+      }
 
       res.send({
         message:"Transaction added",
@@ -106,7 +108,7 @@ app.post("/transaction",(req,res)=>{
 });
 
 
-// ---------------- SUMMARY ----------------
+// ---------------- SUMMARY WITH BALANCE ----------------
 
 app.get("/summary/:userId",(req,res)=>{
 
@@ -116,7 +118,27 @@ app.get("/summary/:userId",(req,res)=>{
     "SELECT type,SUM(amount) as total FROM transactions WHERE userId=? GROUP BY type",
     [userId],
     (err,rows)=>{
-      res.send(rows);
+
+      let credit = 0;
+      let debit = 0;
+
+      rows.forEach(r=>{
+        if(r.type === "credit"){
+          credit = r.total;
+        }
+        if(r.type === "debit"){
+          debit = r.total;
+        }
+      });
+
+      const balance = credit - debit;
+
+      res.send({
+        credit,
+        debit,
+        balance
+      });
+
     }
   );
 
@@ -134,7 +156,44 @@ app.get("/transactions/:userId",(req,res)=>{
     [userId],
     (err,rows)=>{
 
+      if(err){
+        return res.send(err);
+      }
+
       res.send(rows);
+
+    }
+  );
+
+});
+
+
+// ---------------- CURRENT BALANCE ----------------
+
+app.get("/balance/:userId",(req,res)=>{
+
+  const userId = req.params.userId;
+
+  db.all(
+    "SELECT type,amount FROM transactions WHERE userId=?",
+    [userId],
+    (err,rows)=>{
+
+      let balance = 0;
+
+      rows.forEach(t=>{
+
+        if(t.type === "credit"){
+          balance += t.amount;
+        }
+
+        if(t.type === "debit"){
+          balance -= t.amount;
+        }
+
+      });
+
+      res.send({balance});
 
     }
   );
@@ -149,4 +208,3 @@ app.listen(3000,"0.0.0.0",()=>{
   console.log("Server running on port 3000");
 
 });
-

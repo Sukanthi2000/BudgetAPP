@@ -187,7 +187,7 @@ console.log(err)
 function downloadStatement() {
     // Optional: include summary at top
     const balance = document.getElementById("balance").innerText.replace("₹", "").trim();
-    const totalSpent = document.getElementById("totalSpent").innerText.replace("₹", "").trim();
+    const totalSpent = document.getElementById("spent").innerText.replace("₹", "").trim();
 
     let csvContent = `Current Balance,${balance}\nTotal Spent,${totalSpent}\n\n`;
     csvContent += "Date,Message,Type,Amount\n";
@@ -247,8 +247,5 @@ function logout() {
     // 3️⃣ Redirect to login page
     window.location = "index.html";
 
-    // 4️⃣ Optional: prevent going back to dashboard after logout
-    // (Add this at the top of your dashboard.js, outside logout function)
-     window.history.pushState(null, null, window.location.href);
-    window.onpopstate = function () { window.location = "index.html"; };
+
 }

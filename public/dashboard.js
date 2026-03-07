@@ -25,8 +25,47 @@ loadTransactions()
 getSummary()
 
 }
+// ---------- LOAD TRANSACTIONS ----------
+function loadTransactions() {
+    fetch("/transactions/" + userId)  // Make sure this endpoint returns all transactions for the user
+    .then(res => res.json())
+    .then(data => {
+        const tbody = document.getElementById("transactions");
+        tbody.innerHTML = ""; // Clear existing rows
 
+        let totalSpent = 0;
+        let currentBalance = 0;
 
+        data.forEach(tx => {
+            // Calculate balance dynamically (optional)
+            if(tx.type === "credit") currentBalance += tx.amount;
+            else if(tx.type === "debit") currentBalance -= tx.amount;
+
+            if(tx.type === "debit") totalSpent += tx.amount;
+
+            const tr = document.createElement("tr");
+
+            const date = new Date(tx.date);
+            const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD
+
+            tr.innerHTML = `
+                <td>${formattedDate}</td>
+                <td>${tx.message || ""}</td>
+                <td>${tx.type}</td>
+                <td>₹${tx.amount}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // Update summary values on page
+        document.getElementById("balance").innerText = currentBalance;
+        document.getElementById("spent").innerText = totalSpent;
+    })
+    .catch(err => {
+        console.log(err);
+        alert("Error loading transactions");
+    });
+}
 // ---------- ADD CREDIT ----------
 
 function addCredit(){

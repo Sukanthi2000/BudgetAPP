@@ -164,7 +164,7 @@ const debit = data.debit || 0
 const balance = data.balance || 0
 
 document.getElementById("balance").innerText = balance
-document.getElementById("remaining").innerText = balance
+document.getElementById("spent").innerText = debit
 
 })
 

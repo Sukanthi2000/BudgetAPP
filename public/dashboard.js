@@ -225,13 +225,18 @@ function printStatement(){
     window.print()
 }
 //-------------logout---------------
-function logout(){
-    // Clear userId from localStorage
-    localStorage.removeItem("userId");
+function logout() {
+    // 1️⃣ Clear the stored login info
+    localStorage.removeItem("userId");  // user is now logged out
 
-    // Alert user
+    // 2️⃣ Optional: alert the user
     alert("Logged out successfully");
 
-    // Redirect to login page
+    // 3️⃣ Redirect to login page
     window.location = "index.html";
+
+    // 4️⃣ Optional: prevent going back to dashboard after logout
+    // (Add this at the top of your dashboard.js, outside logout function)
+     window.history.pushState(null, null, window.location.href);
+    window.onpopstate = function () { window.location = "index.html"; };
 }

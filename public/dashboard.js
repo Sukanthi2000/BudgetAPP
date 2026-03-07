@@ -224,3 +224,14 @@ document.getElementById("message").value = ""
 function printStatement(){
     window.print()
 }
+//-------------logout---------------
+function logout(){
+    // Clear userId from localStorage
+    localStorage.removeItem("userId");
+
+    // Alert user
+    alert("Logged out successfully");
+
+    // Redirect to login page
+    window.location = "index.html";
+}

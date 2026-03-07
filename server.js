@@ -68,7 +68,7 @@ app.post("/login",(req,res)=>{
     (err,row)=>{
 
       if(!row){
-        return res.send({message:"Invalid login"});
+        return res.send({message:"Invalid login,Signup if a new user"});
       }
 
       res.send({
@@ -149,3 +149,4 @@ app.listen(3000,"0.0.0.0",()=>{
   console.log("Server running on port 3000");
 
 });
+

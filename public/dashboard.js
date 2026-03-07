@@ -196,3 +196,8 @@ document.getElementById("amount").value = ""
 document.getElementById("message").value = ""
 
 }
+
+// ---------- PRINT STATEMENT ----------
+function printStatement(){
+    window.print()
+}

@@ -1,12 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Budget Dashboard</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg,#4facfe,#00f2fe);
+    margin:0;
+    padding:0;
+}
+
+.container{
+    width:70%;
+    margin:auto;
+    margin-top:40px;
+    background:white;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+h2{
+    text-align:center;
+    color:#333;
+}
+
+.balance-box{
+    text-align:center;
+    font-size:22px;
+    margin-bottom:20px;
+}
+
+input{
+    padding:10px;
+    margin:8px;
+    border-radius:6px;
+    border:1px solid #ccc;
+    width:200px;
+}
+
+button{
+    padding:10px 15px;
+    border:none;
+    border-radius:6px;
+    margin:5px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.credit{
+    background:#28a745;
+    color:white;
+}
+
+.debit{
+    background:#dc3545;
+    color:white;
+}
+
+.summary{
+    background:#007bff;
+    color:white;
+}
+
+table{
+    width:100%;
+    margin-top:20px;
+    border-collapse:collapse;
+}
+
+th{
+    background:#007bff;
+    color:white;
+    padding:10px;
+}
+
+td{
+    padding:10px;
+    text-align:center;
+}
+
+tr:nth-child(even){
+    background:#f2f2f2;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
 <h2>Budget Dashboard</h2>
 
-<input id="amount" placeholder="Amount">
+<div class="balance-box">
+Current Balance: ₹ <span id="balance">0</span>
+</div>
 
-<button onclick="addCredit()">Add Credit</button>
-<button onclick="addDebit()">Add Debit</button>
+<input id="amount" placeholder="Enter Amount">
 
-<button onclick="getSummary()">View Summary</button>
+<input type="date" id="date">
 
-<div id="summary"></div>
+<input id="message" placeholder="Enter spending message">
+
+<br>
+
+<button class="credit" onclick="addCredit()">Add Credit</button>
+<button class="debit" onclick="addDebit()">Add Debit</button>
+
+<button class="summary" onclick="getSummary()">View Summary</button>
+
+<h3>Remaining Balance: ₹ <span id="remaining">0</span></h3>
+
+<hr>
+
+<h3>Transaction History</h3>
+
+<table>
+
+<tr>
+<th>Date</th>
+<th>Message</th>
+<th>Type</th>
+<th>Amount</th>
+</tr>
+
+<tbody id="transactions"></tbody>
+
+</table>
+
+</div>
 
 <script src="script.js"></script>
+
+</body>
+</html>

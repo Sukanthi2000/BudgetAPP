@@ -175,62 +175,43 @@ console.log(err)
 }
 //------------Download Function----------
 function downloadStatement() {
-    // 1️⃣ Get all transactions from table
-    const rows = document.querySelectorAll("#transactions tr");
-    let csvContent = "Date,Message,Type,Amount\n";
+    // Optional: include summary at top
+    const balance = document.getElementById("balance").innerText.replace("₹", "").trim();
+    const totalSpent = document.getElementById("totalSpent").innerText.replace("₹", "").trim();
 
+    let csvContent = `Current Balance,${balance}\nTotal Spent,${totalSpent}\n\n`;
+    csvContent += "Date,Message,Type,Amount\n";
+
+    // Loop through transactions table
+    const rows = document.querySelectorAll("#transactions tr");
     rows.forEach(row => {
         const cols = row.querySelectorAll("td");
-        if(cols.length > 0){
-            const rowData = Array.from(cols).map(c => c.innerText).join(",");
+        if (cols.length > 0) {
+            // Format date as YYYY-MM-DD
+            const date = new Date(cols[0].innerText.trim());
+            const formattedDate = date.toISOString().split('T')[0];
+
+            // Clean amount: remove ₹ and commas, keep as plain number
+            const amount = cols[3].innerText.replace("₹", "").replace(",", "").trim();
+
+            const rowData = [
+                formattedDate,
+                cols[1].innerText.trim(),
+                cols[2].innerText.trim(),
+                amount
+            ].join(",");
+
             csvContent += rowData + "\n";
         }
     });
 
-    // 2️⃣ Create a blob and download
+    // Create and download CSV
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "transactions.csv";
     link.click();
 }
-
-
-// ---------- LOAD TRANSACTIONS ----------
-
-function loadTransactions(){
-
-fetch("/transactions/" + userId)
-
-.then(res=>res.json())
-
-.then(data=>{
-
-let rows = ""
-
-data.forEach(t => {
-
-rows += `
-<tr>
-<td>${t.date}</td>
-<td>${t.message || ""}</td>
-<td>${t.type}</td>
-<td>₹ ${t.amount}</td>
-</tr>
-`
-
-})
-
-document.getElementById("transactions").innerHTML = rows
-
-})
-
-.catch(err=>{
-console.log(err)
-})
-
-}
-
 
 // ---------- CLEAR INPUTS ----------
 

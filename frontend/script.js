@@ -1,3 +1,6 @@
+
+// ---------- BASE URL FOR BACKEND ----------
+const BASE_URL = "http://backend:3000"; 
 // ---------- UI SLIDER ----------
 
 const loginText = document.querySelector(".title-text .login");

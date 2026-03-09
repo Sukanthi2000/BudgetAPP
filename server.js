@@ -1,7 +1,8 @@
 const express = require("express");
-const sqlite3 = require("sqlite3").verbose();
+const mysql = require("mysql2");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+require("dotenv").config();
 
 const app = express();
 
@@ -9,49 +10,83 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static("public"));
 
-const db = new sqlite3.Database("./database.db");
 
+// ---------------- CREATE DATABASE ----------------
 
-// ---------------- DATABASE TABLES ----------------
+const connection = mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD
+});
 
-db.serialize(() => {
+connection.query(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME}`, (err) => {
 
-  db.run(`CREATE TABLE IF NOT EXISTS users(
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT UNIQUE,
-      password TEXT
-  )`);
+  if (err) {
+    console.error("Database creation failed:", err);
+    return;
+  }
 
-  db.run(`CREATE TABLE IF NOT EXISTS transactions(
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      userId INTEGER,
-      type TEXT,
-      amount INTEGER,
-      date TEXT,
-      message TEXT
-  )`);
+  console.log("Database ready");
+
+  startServer();
 
 });
 
 
+// ---------------- START APP ----------------
+
+function startServer(){
+
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
+});
+
+
+// ---------------- CREATE TABLES ----------------
+
+db.query(`
+CREATE TABLE IF NOT EXISTS users(
+ id INT AUTO_INCREMENT PRIMARY KEY,
+ username VARCHAR(100) UNIQUE,
+ password VARCHAR(100)
+)
+`);
+
+db.query(`
+CREATE TABLE IF NOT EXISTS transactions(
+ id INT AUTO_INCREMENT PRIMARY KEY,
+ userId INT,
+ type VARCHAR(10),
+ amount INT,
+ date DATE,
+ message TEXT
+)
+`);
+
+console.log("Tables verified");
+
+
 // ---------------- SIGNUP ----------------
 
-app.post("/signup", (req,res)=>{
+app.post("/signup",(req,res)=>{
 
-  const {username,password} = req.body;
+ const {username,password} = req.body;
 
-  db.run(
-    "INSERT INTO users(username,password) VALUES(?,?)",
-    [username,password],
-    function(err){
+ db.query(
+  "INSERT INTO users(username,password) VALUES(?,?)",
+  [username,password],
+  (err,result)=>{
 
-      if(err){
-        return res.send({message:"User already exists"});
-      }
+   if(err){
+    return res.send({message:"User already exists"});
+   }
 
-      res.send({message:"User created"});
-    }
-  );
+   res.send({message:"User created"});
+  }
+ );
 
 });
 
@@ -60,24 +95,28 @@ app.post("/signup", (req,res)=>{
 
 app.post("/login",(req,res)=>{
 
-  const {username,password} = req.body;
+ const {username,password} = req.body;
 
-  db.get(
-    "SELECT * FROM users WHERE username=? AND password=?",
-    [username,password],
-    (err,row)=>{
+ db.query(
+  "SELECT * FROM users WHERE username=? AND password=?",
+  [username,password],
+  (err,rows)=>{
 
-      if(!row){
-        return res.send({message:"Invalid login,Signup if new user"});
-      }
+   if(err){
+    return res.send(err);
+   }
 
-      res.send({
-        message:"Login success",
-        userId:row.id
-      });
+   if(rows.length === 0){
+    return res.send({message:"Invalid login, Signup if new user"});
+   }
 
-    }
-  );
+   res.send({
+    message:"Login success",
+    userId:rows[0].id
+   });
+
+  }
+ );
 
 });
 
@@ -86,61 +125,61 @@ app.post("/login",(req,res)=>{
 
 app.post("/transaction",(req,res)=>{
 
-  const {userId,type,amount,date,message} = req.body;
+ const {userId,type,amount,date,message} = req.body;
 
-  db.run(
-    "INSERT INTO transactions(userId,type,amount,date,message) VALUES(?,?,?,?,?)",
-    [userId,type,amount,date,message],
-    function(err){
+ db.query(
+  "INSERT INTO transactions(userId,type,amount,date,message) VALUES(?,?,?,?,?)",
+  [userId,type,amount,date,message],
+  (err,result)=>{
 
-      if(err){
-        return res.send(err);
-      }
+   if(err){
+    return res.send(err);
+   }
 
-      res.send({
-        //message:"Transaction added",
-        id:this.lastID
-      });
+   res.send({id:result.insertId});
 
-    }
-  );
+  }
+ );
 
 });
 
 
-// ---------------- SUMMARY WITH BALANCE ----------------
+// ---------------- SUMMARY ----------------
 
 app.get("/summary/:userId",(req,res)=>{
 
-  const userId = req.params.userId;
+ const userId = req.params.userId;
 
-  db.all(
-    "SELECT type,SUM(amount) as total FROM transactions WHERE userId=? GROUP BY type",
-    [userId],
-    (err,rows)=>{
+ db.query(
+  "SELECT type,SUM(amount) as total FROM transactions WHERE userId=? GROUP BY type",
+  [userId],
+  (err,rows)=>{
 
-      let credit = 0;
-      let debit = 0;
+   if(err){
+    return res.send(err);
+   }
 
-      rows.forEach(r=>{
-        if(r.type === "credit"){
-          credit = r.total;
-        }
-        if(r.type === "debit"){
-          debit = r.total;
-        }
-      });
+   let credit = 0;
+   let debit = 0;
 
-      const balance = credit - debit;
+   rows.forEach(r=>{
 
-      res.send({
-        credit,
-        debit,
-        balance
-      });
-
+    if(r.type === "credit"){
+     credit = r.total;
     }
-  );
+
+    if(r.type === "debit"){
+     debit = r.total;
+    }
+
+   });
+
+   const balance = credit - debit;
+
+   res.send({credit,debit,balance});
+
+  }
+ );
 
 });
 
@@ -149,21 +188,21 @@ app.get("/summary/:userId",(req,res)=>{
 
 app.get("/transactions/:userId",(req,res)=>{
 
-  const userId = req.params.userId;
+ const userId = req.params.userId;
 
-  db.all(
-    "SELECT * FROM transactions WHERE userId=? ORDER BY id DESC",
-    [userId],
-    (err,rows)=>{
+ db.query(
+  "SELECT * FROM transactions WHERE userId=? ORDER BY id DESC",
+  [userId],
+  (err,rows)=>{
 
-      if(err){
-        return res.send(err);
-      }
+   if(err){
+    return res.send(err);
+   }
 
-      res.send(rows);
+   res.send(rows);
 
-    }
-  );
+  }
+ );
 
 });
 
@@ -172,31 +211,35 @@ app.get("/transactions/:userId",(req,res)=>{
 
 app.get("/balance/:userId",(req,res)=>{
 
-  const userId = req.params.userId;
+ const userId = req.params.userId;
 
-  db.all(
-    "SELECT type,amount FROM transactions WHERE userId=?",
-    [userId],
-    (err,rows)=>{
+ db.query(
+  "SELECT type,amount FROM transactions WHERE userId=?",
+  [userId],
+  (err,rows)=>{
 
-      let balance = 0;
+   if(err){
+    return res.send(err);
+   }
 
-      rows.forEach(t=>{
+   let balance = 0;
 
-        if(t.type === "credit"){
-          balance += t.amount;
-        }
+   rows.forEach(t=>{
 
-        if(t.type === "debit"){
-          balance -= t.amount;
-        }
-
-      });
-
-      res.send({balance});
-
+    if(t.type === "credit"){
+     balance += t.amount;
     }
-  );
+
+    if(t.type === "debit"){
+     balance -= t.amount;
+    }
+
+   });
+
+   res.send({balance});
+
+  }
+ );
 
 });
 
@@ -205,8 +248,8 @@ app.get("/balance/:userId",(req,res)=>{
 
 app.listen(3000,"0.0.0.0",()=>{
 
-  console.log("Server running on port 3000");
+ console.log("Server running on port 3000");
 
 });
 
-
+}

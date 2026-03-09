@@ -1,3 +1,6 @@
 npm init -y → create package.json
 
 npm install express sqlite3 body-parser cors
+
+install docker,docker compose
+
